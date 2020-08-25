@@ -1,0 +1,35 @@
+---
+format_version: '8'
+default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
+project_type: xamarin
+trigger_map:
+- push_branch: '*'
+  workflow: primary
+- pull_request_source_branch: '*'
+  workflow: primary
+workflows:
+  primary:
+    steps:
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@4: {}
+    - script@1:
+        title: Do anything with Script step
+    - certificate-and-profile-installer@1: {}
+    - xamarin-archive@1:
+        inputs:
+        - xamarin_solution: $BITRISE_PROJECT_PATH
+        - xamarin_configuration: $BITRISE_XAMARIN_CONFIGURATION
+        - xamarin_platform: $BITRISE_XAMARIN_PLATFORM
+    - deploy-to-bitrise-io@1: {}
+app:
+  envs:
+  - opts:
+      is_expand: false
+    BITRISE_PROJECT_PATH: TestXamarinApp.sln
+  - opts:
+      is_expand: false
+    BITRISE_XAMARIN_CONFIGURATION: Ad-Hoc
+  - opts:
+      is_expand: false
+    BITRISE_XAMARIN_PLATFORM: Any CPU
